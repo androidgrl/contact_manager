@@ -2,6 +2,7 @@ require 'rails_helper'
 
 RSpec.describe Person, type: :model do
   let(:person) { Person.new(first_name: "Jeff", last_name: "Gu") }
+
   it "is invalid without a first name" do
     person.first_name = nil
     expect(person).not_to be_valid
