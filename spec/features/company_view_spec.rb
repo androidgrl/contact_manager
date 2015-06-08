@@ -59,4 +59,61 @@ describe 'the company view', type: :feature do
       expect(page).to_not have_content("555-1234")
     end
   end
+
+  describe 'email addresses' do
+    before(:each) do
+      company.email_addresses.create(address: "jamie@gmail.com")
+      company.email_addresses.create(address: "jamie@yahoo.com")
+      visit company_path(company)
+    end
+
+    it 'has list of  the email addresses' do
+      expect(page).to have_selector('li', text: "jamie@gmail.com")
+      expect(page).to have_selector('li', text: "jamie@yahoo.com")
+    end
+
+    it 'has add new email address link' do
+      expect(page).to have_link("Add email", href:new_email_address_path(contact_id: company.id, contact_type: "Company"))
+      click_link('Add email')
+      expect(current_path).to eq(new_email_address_path)
+    end
+
+    it 'deletes an email' do
+      first(:link, 'delete').click
+      expect(current_path).to eq(company_path(company))
+      expect(page).to_not have_content("jamie@gmail.com")
+    end
+
+    it 'adds a new email address' do
+      page.click_link('Add email')
+      page.fill_in('Address', with: 'jamie@islandnet.com')
+      page.click_button('Create Email address')
+      expect(current_path).to eq(company_path(company))
+      expect(page).to have_content('jamie@islandnet.com')
+    end
+
+    it 'has link to edit email address' do
+      company.email_addresses.each do |email|
+        expect(page).to have_link("edit", href:edit_email_address_path(email))
+      end
+    end
+
+    it 'edits an email address' do
+      email = company.email_addresses.first
+      old_address = email.address
+
+      first(:link, "edit").click
+      page.fill_in("Address", with: "interesting@gmail.com")
+      page.click_button("Update Email address")
+      expect(current_path).to eq(company_path(company))
+      expect(page).to have_content("interesting@gmail.com")
+      expect(page).to_not have_content(old_address)
+    end
+
+    it 'has link to destroy email address' do
+      company.email_addresses.each do |email|
+        expect(page).to have_link("delete", href:email_address_path(email))
+      end
+    end
+  end
 end
